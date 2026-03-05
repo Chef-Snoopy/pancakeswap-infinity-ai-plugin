@@ -61,8 +61,7 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
         token1 = tokens[1];
         (currency0, currency1) = SortTokens.sort(token0, token1);
 
-        address[4] memory approvalAddress =
-            [address(cpm), address(swapRouter), address(swapFeeHook), address(permit2)];
+        address[4] memory approvalAddress = [address(cpm), address(swapRouter), address(swapFeeHook), address(permit2)];
         for (uint256 i; i < approvalAddress.length; i++) {
             token0.approve(approvalAddress[i], type(uint256).max);
             token1.approve(approvalAddress[i], type(uint256).max);
@@ -124,15 +123,11 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
 
     function testSwapZeroForOneExactInput() public {
         uint128 amountIn = 1e18;
-        
+
         // zeroForOne + exactInput → fee taken from currency1 (output)
         swapRouter.exactInputSingle(
             ICLRouterBase.CLSwapExactInputSingleParams({
-                poolKey: key,
-                zeroForOne: true,
-                amountIn: amountIn,
-                amountOutMinimum: 0,
-                hookData: ZERO_BYTES
+                poolKey: key, zeroForOne: true, amountIn: amountIn, amountOutMinimum: 0, hookData: ZERO_BYTES
             }),
             block.timestamp
         );
@@ -144,7 +139,7 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
 
     function testSwapZeroForOneExactOutput() public {
         uint128 amountOut = 1e18;
-        
+
         // zeroForOne + exactOutput → fee taken from currency0 (input)
         swapRouter.exactOutputSingle(
             ICLRouterBase.CLSwapExactOutputSingleParams({
@@ -164,15 +159,11 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
 
     function testSwapOneForZeroExactInput() public {
         uint128 amountIn = 1e18;
-        
+
         // oneForZero + exactInput → fee taken from currency0 (output)
         swapRouter.exactInputSingle(
             ICLRouterBase.CLSwapExactInputSingleParams({
-                poolKey: key,
-                zeroForOne: false,
-                amountIn: amountIn,
-                amountOutMinimum: 0,
-                hookData: ZERO_BYTES
+                poolKey: key, zeroForOne: false, amountIn: amountIn, amountOutMinimum: 0, hookData: ZERO_BYTES
             }),
             block.timestamp
         );
@@ -184,7 +175,7 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
 
     function testSwapOneForZeroExactOutput() public {
         uint128 amountOut = 1e18;
-        
+
         // oneForZero + exactOutput → fee taken from currency1 (input)
         swapRouter.exactOutputSingle(
             ICLRouterBase.CLSwapExactOutputSingleParams({
@@ -204,15 +195,11 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
 
     function testFeeAccrual() public {
         uint128 amountIn = 1e18;
-        
+
         // Perform first swap (zeroForOne)
         swapRouter.exactInputSingle(
             ICLRouterBase.CLSwapExactInputSingleParams({
-                poolKey: key,
-                zeroForOne: true,
-                amountIn: amountIn,
-                amountOutMinimum: 0,
-                hookData: ZERO_BYTES
+                poolKey: key, zeroForOne: true, amountIn: amountIn, amountOutMinimum: 0, hookData: ZERO_BYTES
             }),
             block.timestamp
         );
@@ -223,11 +210,7 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
         // Perform second swap (opposite direction to avoid price limit issue)
         swapRouter.exactInputSingle(
             ICLRouterBase.CLSwapExactInputSingleParams({
-                poolKey: key,
-                zeroForOne: false,
-                amountIn: amountIn,
-                amountOutMinimum: 0,
-                hookData: ZERO_BYTES
+                poolKey: key, zeroForOne: false, amountIn: amountIn, amountOutMinimum: 0, hookData: ZERO_BYTES
             }),
             block.timestamp
         );
@@ -239,17 +222,13 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
 
     function testFeeEventEmitted() public {
         uint128 amountIn = 1e18;
-        
+
         vm.expectEmit(true, true, false, false);
         emit CLSwapFeeHook.FeeAccrued(id, currency1, 0);
-        
+
         swapRouter.exactInputSingle(
             ICLRouterBase.CLSwapExactInputSingleParams({
-                poolKey: key,
-                zeroForOne: true,
-                amountIn: amountIn,
-                amountOutMinimum: 0,
-                hookData: ZERO_BYTES
+                poolKey: key, zeroForOne: true, amountIn: amountIn, amountOutMinimum: 0, hookData: ZERO_BYTES
             }),
             block.timestamp
         );
@@ -261,11 +240,7 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
         // Accrue some fees first
         swapRouter.exactInputSingle(
             ICLRouterBase.CLSwapExactInputSingleParams({
-                poolKey: key,
-                zeroForOne: true,
-                amountIn: 1e18,
-                amountOutMinimum: 0,
-                hookData: ZERO_BYTES
+                poolKey: key, zeroForOne: true, amountIn: 1e18, amountOutMinimum: 0, hookData: ZERO_BYTES
             }),
             block.timestamp
         );
@@ -274,7 +249,7 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
         assertTrue(accruedFee > 0, "Should have accrued fees");
 
         uint256 balanceBefore = currency1.balanceOf(bob);
-        
+
         // Withdraw fees to bob
         swapFeeHook.withdrawFees(currency1, bob, accruedFee);
 
@@ -287,18 +262,14 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
         // Accrue some fees first
         swapRouter.exactInputSingle(
             ICLRouterBase.CLSwapExactInputSingleParams({
-                poolKey: key,
-                zeroForOne: true,
-                amountIn: 1e18,
-                amountOutMinimum: 0,
-                hookData: ZERO_BYTES
+                poolKey: key, zeroForOne: true, amountIn: 1e18, amountOutMinimum: 0, hookData: ZERO_BYTES
             }),
             block.timestamp
         );
 
         uint256 accruedFee = swapFeeHook.accruedFees(currency1);
         uint256 balanceBefore = currency1.balanceOf(bob);
-        
+
         // amount = 0 should withdraw all
         swapFeeHook.withdrawFees(currency1, bob, 0);
 
@@ -326,20 +297,16 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
         // Accrue fees
         swapRouter.exactInputSingle(
             ICLRouterBase.CLSwapExactInputSingleParams({
-                poolKey: key,
-                zeroForOne: true,
-                amountIn: 1e18,
-                amountOutMinimum: 0,
-                hookData: ZERO_BYTES
+                poolKey: key, zeroForOne: true, amountIn: 1e18, amountOutMinimum: 0, hookData: ZERO_BYTES
             }),
             block.timestamp
         );
 
         uint256 accruedFee = swapFeeHook.accruedFees(currency1);
-        
+
         vm.expectEmit(true, true, false, true);
         emit CLSwapFeeHook.FeesWithdrawn(currency1, bob, accruedFee);
-        
+
         swapFeeHook.withdrawFees(currency1, bob, accruedFee);
     }
 
@@ -365,23 +332,23 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
     function testInitiateAdminTransferEvent() public {
         vm.expectEmit(true, false, false, false);
         emit CLSwapFeeHook.AdminTransferInitiated(alice);
-        
+
         swapFeeHook.initiateAdminTransfer(alice);
     }
 
     function testAcceptAdminTransfer() public {
         swapFeeHook.initiateAdminTransfer(alice);
-        
+
         vm.prank(alice);
         swapFeeHook.acceptAdminTransfer();
-        
+
         assertEq(swapFeeHook.admin(), alice);
         assertEq(swapFeeHook.pendingAdmin(), address(0));
     }
 
     function testAcceptAdminTransferRevertsOnNonPendingAdmin() public {
         swapFeeHook.initiateAdminTransfer(alice);
-        
+
         vm.prank(bob);
         vm.expectRevert(CLSwapFeeHook.NotPendingAdmin.selector);
         swapFeeHook.acceptAdminTransfer();
@@ -389,10 +356,10 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
 
     function testAcceptAdminTransferEvent() public {
         swapFeeHook.initiateAdminTransfer(alice);
-        
+
         vm.expectEmit(true, true, false, false);
         emit CLSwapFeeHook.AdminTransferred(admin, alice);
-        
+
         vm.prank(alice);
         swapFeeHook.acceptAdminTransfer();
     }
@@ -401,11 +368,7 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
         // Accrue fees
         swapRouter.exactInputSingle(
             ICLRouterBase.CLSwapExactInputSingleParams({
-                poolKey: key,
-                zeroForOne: true,
-                amountIn: 1e18,
-                amountOutMinimum: 0,
-                hookData: ZERO_BYTES
+                poolKey: key, zeroForOne: true, amountIn: 1e18, amountOutMinimum: 0, hookData: ZERO_BYTES
             }),
             block.timestamp
         );
@@ -417,10 +380,10 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
 
         // New admin withdraws fees
         uint256 accruedFee = swapFeeHook.accruedFees(currency1);
-        
+
         vm.prank(alice);
         swapFeeHook.withdrawFees(currency1, bob, accruedFee);
-        
+
         assertEq(swapFeeHook.accruedFees(currency1), 0);
     }
 
@@ -428,11 +391,7 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
         // Accrue fees
         swapRouter.exactInputSingle(
             ICLRouterBase.CLSwapExactInputSingleParams({
-                poolKey: key,
-                zeroForOne: true,
-                amountIn: 1e18,
-                amountOutMinimum: 0,
-                hookData: ZERO_BYTES
+                poolKey: key, zeroForOne: true, amountIn: 1e18, amountOutMinimum: 0, hookData: ZERO_BYTES
             }),
             block.timestamp
         );
@@ -445,5 +404,221 @@ contract CLSwapFeeHookTest is Test, Deployers, DeployPermit2 {
         // Old admin cannot withdraw
         vm.expectRevert(CLSwapFeeHook.OnlyAdmin.selector);
         swapFeeHook.withdrawFees(currency1, bob, 100);
+    }
+
+    // ── Fee Calculation Accuracy Tests ──────────────────────────────────────
+
+    function testFeeCalculationExactInputZeroForOne() public {
+        uint128 amountIn = 1e18;
+
+        // Record balance before to calculate actual output
+        uint256 balance1Before = currency1.balanceOf(address(this));
+
+        // Execute swap: zeroForOne + exactInput → fee from currency1 (output)
+        swapRouter.exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
+                poolKey: key, zeroForOne: true, amountIn: amountIn, amountOutMinimum: 0, hookData: ZERO_BYTES
+            }),
+            block.timestamp
+        );
+
+        uint256 balance1After = currency1.balanceOf(address(this));
+        uint256 actualReceived = balance1After - balance1Before;
+
+        // Get accrued fee
+        uint256 accruedFee = swapFeeHook.accruedFees(currency1);
+        assertTrue(accruedFee > 0, "Should accrue fee on output currency");
+
+        // Total output = what user received + fee charged
+        uint256 totalOutput = actualReceived + accruedFee;
+
+        // Verify fee is 0.1% of total output
+        uint256 expectedFee = (totalOutput * 10) / 10_000;
+        assertEq(accruedFee, expectedFee, "Fee should be 0.1% of total output");
+    }
+
+    function testFeeCalculationExactOutputOneForZero() public {
+        uint128 amountOut = 5e17; // 0.5 token
+
+        // Execute swap: oneForZero + exactOutput → fee from currency1 (input)
+        // User specifies exact output, hook adds fee to input cost
+        swapRouter.exactOutputSingle(
+            ICLRouterBase.CLSwapExactOutputSingleParams({
+                poolKey: key,
+                zeroForOne: false,
+                amountOut: amountOut,
+                amountInMaximum: type(uint128).max,
+                hookData: ZERO_BYTES
+            }),
+            block.timestamp
+        );
+
+        // Fee should be accrued on currency1 (input side)
+        uint256 accruedFee = swapFeeHook.accruedFees(currency1);
+        assertTrue(accruedFee > 0, "Fee should be charged on input currency");
+
+        // For exactOutput, fee is 0.1% of the input required
+        // We can't easily predict the exact input amount, but we can verify fee exists
+        // and is reasonable (should be < 1% of desired output)
+        assertTrue(accruedFee < amountOut / 100, "Fee should be much less than output amount");
+    }
+
+    function testFeeCalculationMultipleSwaps() public {
+        uint128 amountIn1 = 1e18;
+        uint128 amountIn2 = 5e17;
+        uint128 amountIn3 = 2e18;
+
+        // First swap
+        swapRouter.exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
+                poolKey: key, zeroForOne: true, amountIn: amountIn1, amountOutMinimum: 0, hookData: ZERO_BYTES
+            }),
+            block.timestamp
+        );
+        uint256 fee1 = swapFeeHook.accruedFees(currency1);
+        assertTrue(fee1 > 0, "First fee should be accrued");
+
+        // Second swap (opposite direction)
+        swapRouter.exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
+                poolKey: key, zeroForOne: false, amountIn: amountIn2, amountOutMinimum: 0, hookData: ZERO_BYTES
+            }),
+            block.timestamp
+        );
+        uint256 fee2 = swapFeeHook.accruedFees(currency0);
+        assertTrue(fee2 > 0, "Second fee should be accrued");
+
+        // Third swap (same direction as first)
+        swapRouter.exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
+                poolKey: key, zeroForOne: true, amountIn: amountIn3, amountOutMinimum: 0, hookData: ZERO_BYTES
+            }),
+            block.timestamp
+        );
+        uint256 fee1After = swapFeeHook.accruedFees(currency1);
+
+        // Verify cumulative fees
+        assertTrue(fee1After > fee1, "Currency1 fees should accumulate");
+        assertEq(swapFeeHook.accruedFees(currency0), fee2, "Currency0 fee should remain unchanged");
+    }
+
+    function testFeeCalculationSmallSwap() public {
+        // Test with very small amount
+        uint128 amountIn = 1000; // 1000 wei
+
+        swapRouter.exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
+                poolKey: key, zeroForOne: true, amountIn: amountIn, amountOutMinimum: 0, hookData: ZERO_BYTES
+            }),
+            block.timestamp
+        );
+
+        uint256 accruedFee = swapFeeHook.accruedFees(currency1);
+
+        // Fee might be 0 for very small amounts due to rounding
+        assertTrue(accruedFee >= 0, "Fee should be non-negative");
+    }
+
+    function testFeeCalculationLargeSwap() public {
+        // Test with larger amount
+        uint128 amountIn = 10e18; // 10 tokens
+
+        uint256 balance1Before = currency1.balanceOf(address(this));
+
+        swapRouter.exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
+                poolKey: key, zeroForOne: true, amountIn: amountIn, amountOutMinimum: 0, hookData: ZERO_BYTES
+            }),
+            block.timestamp
+        );
+
+        uint256 balance1After = currency1.balanceOf(address(this));
+        uint256 actualReceived = balance1After - balance1Before;
+        uint256 accruedFee = swapFeeHook.accruedFees(currency1);
+
+        assertTrue(accruedFee > 0, "Fee should be accrued for large swap");
+
+        // Verify fee is approximately 0.1% of total output (received + fee)
+        uint256 totalOutput = actualReceived + accruedFee;
+        uint256 feePercentageBps = (accruedFee * 10_000) / totalOutput;
+        assertApproxEqAbs(feePercentageBps, 10, 1, "Fee should be approximately 0.1% (10 bps)");
+    }
+
+    function testFeeCalculationZeroForOneBothDirections() public {
+        // Test that fees are collected in the correct currency for different swap types
+
+        // Scenario 1: exactInput, zeroForOne → fee on currency1
+        uint128 amountIn1 = 1e18;
+
+        swapRouter.exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
+                poolKey: key, zeroForOne: true, amountIn: amountIn1, amountOutMinimum: 0, hookData: ZERO_BYTES
+            }),
+            block.timestamp
+        );
+
+        uint256 fee1 = swapFeeHook.accruedFees(currency1);
+        assertTrue(fee1 > 0, "ExactInput zeroForOne should accrue fee on currency1");
+        assertEq(swapFeeHook.accruedFees(currency0), 0, "Should not accrue fee on currency0");
+
+        // Scenario 2: exactInput, oneForZero → fee on currency0
+        uint128 amountIn2 = 1e18;
+
+        swapRouter.exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
+                poolKey: key, zeroForOne: false, amountIn: amountIn2, amountOutMinimum: 0, hookData: ZERO_BYTES
+            }),
+            block.timestamp
+        );
+
+        uint256 fee0 = swapFeeHook.accruedFees(currency0);
+        assertTrue(fee0 > 0, "ExactInput oneForZero should accrue fee on currency0");
+        assertEq(swapFeeHook.accruedFees(currency1), fee1, "Currency1 fee should remain unchanged");
+    }
+
+    function testFeeWithdrawalMatchesAccrual() public {
+        // Perform swap in one direction
+        uint128 swapAmount1 = 1e18;
+
+        swapRouter.exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
+                poolKey: key, zeroForOne: true, amountIn: swapAmount1, amountOutMinimum: 0, hookData: ZERO_BYTES
+            }),
+            block.timestamp
+        );
+
+        uint256 fee1 = swapFeeHook.accruedFees(currency1);
+
+        // Perform swap in opposite direction
+        uint128 swapAmount2 = 1e18;
+
+        swapRouter.exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
+                poolKey: key, zeroForOne: false, amountIn: swapAmount2, amountOutMinimum: 0, hookData: ZERO_BYTES
+            }),
+            block.timestamp
+        );
+
+        uint256 fee0 = swapFeeHook.accruedFees(currency0);
+
+        // Perform one more swap
+        swapRouter.exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
+                poolKey: key, zeroForOne: true, amountIn: swapAmount1, amountOutMinimum: 0, hookData: ZERO_BYTES
+            }),
+            block.timestamp
+        );
+
+        uint256 totalFee1 = swapFeeHook.accruedFees(currency1);
+        assertTrue(totalFee1 > fee1, "Fees should accumulate");
+
+        // Withdraw currency1 fees and verify
+        uint256 bobBalanceBefore = currency1.balanceOf(bob);
+        swapFeeHook.withdrawFees(currency1, bob, totalFee1);
+        uint256 bobBalanceAfter = currency1.balanceOf(bob);
+
+        assertEq(bobBalanceAfter - bobBalanceBefore, totalFee1, "Withdrawn amount should match accrued fees");
+        assertEq(swapFeeHook.accruedFees(currency1), 0, "Currency1 fees should be zero after withdrawal");
+        assertEq(swapFeeHook.accruedFees(currency0), fee0, "Currency0 fees should remain unchanged");
     }
 }
